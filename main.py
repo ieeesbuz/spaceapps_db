@@ -46,6 +46,7 @@ conn = psycopg2.connect(database="mydb", user="postgres", password="WoodenRumba0
 cur = conn.cursor()
 dataset = rasterio.open('Maps/onroad_2017_84.tif')
 band1 = dataset.read(1)
+cur.execute('DELETE FROM public.nasa')
 
 with open('uscities.csv', mode='r') as csv_file:
     csv_reader = csv.DictReader(csv_file)
