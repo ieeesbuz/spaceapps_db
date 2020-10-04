@@ -8,7 +8,7 @@ import math
 def CO2_calc (lat, lon, area, band1):
     ciudad = np.array([lat, lon, area]) #longitud, latitud, area(km^2)
 
-    dx = 0.014833485247
+    dx = 0.014833485247         #ncols  5070 nrows   3560
     dy = 0.009892490399
     dx_km = 1.649 
     dy_km= 1.100 
@@ -20,9 +20,11 @@ def CO2_calc (lat, lon, area, band1):
     lon_add = abs((ciudad[1])+137.257)
 
     #print(lat_add,lon_add)
-    
     pos_lon = int(round(lon_add/dx))
     pos_lat = int(round(lat_add/dy))
+
+    if area < math.pow(dx_km,2):
+        return(band1[pos_lat,pos_lon])    
 
     #print(pos_lat,pos_lon)
     #band1[pos_lat,pos_lon]
@@ -55,7 +57,8 @@ with open('uscities.csv', mode='r') as csv_file:
         if float(row["density"]) > 0 :
             area = float(row["population"])/float(row["density"])     
             co2=CO2_calc(float(row["lat"]),float(row["lng"]),area,band1)
-            print(co2)        
+            line_count += 1
+            print(line_count)        
             ratio = co2/float(row["population"])
             city= row["city"]
             city = city.replace("'", "''")
