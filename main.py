@@ -95,10 +95,11 @@ with open('uscities.csv', mode='r') as csv_file:
                 city= row["city"]
                 city = city.replace("'", "''")
                 query=f'INSERT INTO public.nasa VALUES (DEFAULT, \'{city}\', \'{row["lat"]}\', \
-                \'{row["lng"]}\',\'{int(population)}\',\'{co2}\',\'{ratio}\',\'{year}\',\'{state_name}\' )'
+                \'{row["lng"]}\',\'{int(population)}\',\'{co2}\',\'{ratio}\',\'{year}\',\'{row["state_name"]}\' )'
                 cur.execute(query)
 
-cur.execute('INSERT INTO public.ranking (name,lat,lng,population,co2,ratio,year) SELECT name,lat,lng,population,co2,ratio,year,state_name FROM public.nasa ORDER BY ratio DESC')
+cur.execute('INSERT INTO public.ranking (name,lat,lng,population,co2,ratio,year,state)\
+     SELECT name,lat,lng,population,co2,ratio,year,state FROM public.nasa ORDER BY ratio DESC')
 #Commit all changes to database
 conn.commit()
 
