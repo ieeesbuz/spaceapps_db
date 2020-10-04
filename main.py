@@ -90,16 +90,15 @@ with open('uscities.csv', mode='r') as csv_file:
                 area = population/float(row["density"])     
                 co2=CO2_calc(float(row["lat"]),float(row["lng"]),area,band1)
                 ratio = co2/population
-                if ratio == 0:
-                     print(row)
+                # if ratio == 0:
+                #      print(row)
                 city= row["city"]
                 city = city.replace("'", "''")
                 query=f'INSERT INTO public.nasa VALUES (DEFAULT, \'{city}\', \'{row["lat"]}\', \
-                \'{row["lng"]}\',\'{int(population)}\',\'{co2}\',\'{ratio}\',\'{year}\' )'
+                \'{row["lng"]}\',\'{int(population)}\',\'{co2}\',\'{ratio}\',\'{year}\',\'{state_name}\' )'
                 cur.execute(query)
-                time.sleep(1)
 
-cur.execute('INSERT INTO public.ranking (name,lat,lng,population,co2,ratio,year) SELECT name,lat,lng,population,co2,ratio,year FROM public.nasa ORDER BY ratio DESC')
+cur.execute('INSERT INTO public.ranking (name,lat,lng,population,co2,ratio,year) SELECT name,lat,lng,population,co2,ratio,year,state_name FROM public.nasa ORDER BY ratio DESC')
 #Commit all changes to database
 conn.commit()
 
