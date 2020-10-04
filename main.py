@@ -4,6 +4,7 @@ import csv
 import psycopg2
 import numpy as np
 import math
+import sys
 
 def CO2_calc (lat, lon, area, band1):
     ciudad = np.array([lat, lon, area]) #longitud, latitud, area(km^2)
@@ -23,9 +24,13 @@ def CO2_calc (lat, lon, area, band1):
     pos_lon = int(round(lon_add/dx))
     pos_lat = int(round(lat_add/dy))
 
-    if area < math.pow(dx_km,2):
-        return(band1[pos_lat,pos_lon])    
-
+    # if area < math.pow(dx_km,2):
+    #     try:
+    #         return(band1[pos_lat,pos_lon]) 
+    #     except IndexError: 
+    #         print(ciudad)
+    #         sys.exit(1)
+    
     #print(pos_lat,pos_lon)
     #band1[pos_lat,pos_lon]
 
@@ -34,7 +39,21 @@ def CO2_calc (lat, lon, area, band1):
 
     #print(lon_mitad,lat_mitad)
 
-    submatrix = band1[(pos_lat-lat_mitad):(pos_lat+lat_mitad),(pos_lon-lon_mitad):(pos_lon+lon_mitad)]
+    if lon_mitad == 0:        
+       c = pos_lon
+       d = pos_lon + 1
+    else:
+        c = pos_lon-lon_mitad
+        d = pos_lon+lon_mitad
+
+    if lat_mitad == 0:
+        a = pos_lat
+        b = pos_lat + 1       
+    else:
+        a = pos_lat-lat_mitad
+        b = pos_lat+lat_mitad
+
+    submatrix = band1[a:b,c:d]
 
     #print(submatrix)
 
@@ -42,7 +61,13 @@ def CO2_calc (lat, lon, area, band1):
 
     #print(CO2_sum)
     return(CO2_sum)
-
+ 
+def coordinatesValid(row):
+    if -137.257 < float(row["lng"]) and -62.0377 > float(row["lng"]) \
+    and 53.3863 > float(row["lat"]) and 22.0928 < float(row["lat"]):
+        return True
+    else:
+        return False
 
 conn = psycopg2.connect(database="mydb", user="postgres", password="WoodenRumba00", host="192.168.0.120")
 cur = conn.cursor()
@@ -54,11 +79,11 @@ with open('uscities.csv', mode='r') as csv_file:
     csv_reader = csv.DictReader(csv_file)
     line_count = 0
     for row in csv_reader:   
-        if float(row["density"]) > 0 :
+        if float(row["density"]) > 0 and coordinatesValid(row) :
             area = float(row["population"])/float(row["density"])     
             co2=CO2_calc(float(row["lat"]),float(row["lng"]),area,band1)
-            line_count += 1
-            print(line_count)        
+            #line_count += 1
+            print(co2)    
             ratio = co2/float(row["population"])
             city= row["city"]
             city = city.replace("'", "''")
